@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import { useDebouncedCallback } from "use-debounce";
-import { useDeleteProductMutation } from "../../api/products/products.api";
+import { useDeleteProductMutation, useDeleteProductsMutation } from "../../api/products/products.api";
 import { useSearch } from "../../hooks/useSearch";
 import { API_STATUS, PRICE } from "../../utils/constants";
 
@@ -68,4 +68,35 @@ export const useDeleteProduct = (cb?: () => void) => {
         loading,
     };
 }
+
+export const useDeleteProducts = (cb?: () => void) => {
+    const [deleteProducts, { status: deletingProducts }] = useDeleteProductsMutation();
+    const loading = useMemo(() => deletingProducts === API_STATUS.PENDING, [deletingProducts]);
+
+    const handleDeleteProducts = useDebouncedCallback((ids: string[]) => {
+        Swal.fire({
+            title: "Do you want to delete the product?",
+            showCancelButton: true,
+            confirmButtonText: "Delete",
+        }).then(async result => {
+            if (result.isConfirmed) {
+                try {
+                    await deleteProducts({ ids }).unwrap();
+                    console.log('cb: ', cb);
+                    if (cb) {
+                        cb();
+                    }
+                } catch (error) {
+                    console.log('error: ', error);
+                }
+            }
+        })
+    }, 300);
+
+    return {
+        handleDeleteProducts,
+        loading,
+    };
+}
+
 export default useFilter;

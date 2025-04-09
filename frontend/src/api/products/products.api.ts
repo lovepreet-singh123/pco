@@ -112,7 +112,7 @@ export const productsApi = createApi({
             query: ({ ids }) => ({
                 url: API.DELETE_PRODUCTS,
                 method: "DELETE",
-                body: ids,
+                body: {ids},
             })
         }),
     })

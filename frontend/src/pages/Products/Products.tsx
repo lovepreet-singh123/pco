@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Badge, Table } from "react-bootstrap"
 import { Controller } from "react-hook-form"
+import toast from "react-hot-toast"
 import { Range } from "react-range"
 import { useDebouncedCallback } from "use-debounce"
-import useFilter, { useDeleteProduct } from "../../actions/products/product.action"
+import useFilter, { useDeleteProduct, useDeleteProducts } from "../../actions/products/product.action"
 import { useGetProductsQuery } from "../../api/products/products.api"
 import Button from "../../components/Button/Button"
 import Checkbox from "../../components/form/Checkbox/Checkbox"
@@ -21,13 +22,20 @@ const Products = () => {
     const [show, setShow] = useState(false);
     const [view, setView] = useState(false);
     const [id, setId] = useState("");
+    const [ids, setIds] = useState<string[]>([]);
+    console.log('ids: ', ids);
     const [rangeValues, setRangeValues] = useState([PRICE.MIN, PRICE.MAX]);
     const { canCreate, canDelete, canEdit, canView } = usePermissions("product");
     const { control, handlePage, setValue, values, reset } = useFilter();
     const handleUpdateSearch = useUpdate();
     const { data, status, refetch } = useGetProductsQuery(values);
+    const allSelected = useMemo(() => data?.products && data.products.length === ids.length, [ids, data])
     const { handleDelete, loading: deleteProductLoading } = useDeleteProduct(() => {
         setId("");
+        refetch();
+    });
+    const { handleDeleteProducts, loading: deleteProductsLoading } = useDeleteProducts(() => {
+        setIds([]);
         refetch();
     });
     const loading = useMemo(() => status === API_STATUS.PENDING, [status]);
@@ -46,6 +54,22 @@ const Products = () => {
         setRangeValues([PRICE.MIN, PRICE.MAX])
         handleUpdateSearch("search", "", true);
     }, 300)
+
+    const handleSelectProduct = useCallback((id: string) => {
+        setIds(ids => getFilteredValues(ids, id));
+    }, [setIds, getFilteredValues])
+
+    const handleSelectAll = useCallback(() => {
+        if (data?.products) {
+            setIds(ids => data.products.length === ids.length ? [] : data?.products.map(item => item._id))
+        } else {
+            toast.error("There's no record to select")
+        }
+    }, [setIds, data])
+
+    useEffect(() => {
+        setIds([])
+    }, [data?.products, setIds])
 
     return (
         <div>
@@ -130,6 +154,7 @@ const Products = () => {
                 </div>
                 <Button onClick={handleReset} className="ms-auto">Reset</Button>
                 {canCreate && <Button onClick={() => setShow(true)} className="ms-auto">Create</Button>}
+                {(canDelete && ids.length > 0) && (deleteProductsLoading ? <Spinner /> : <Button onClick={() => handleDeleteProducts(ids)} className="ms-auto">Delete Selected</Button>)}
             </div>
             <div className="d-flex my-4 gap-3 align-items-center">
                 <Controller
@@ -197,7 +222,7 @@ const Products = () => {
             <Table responsive>
                 <thead>
                     <tr>
-                        <th><Checkbox /></th>
+                        <th><Checkbox onChange={handleSelectAll} checked={allSelected} /></th>
                         <th>Name</th>
                         <th>Description</th>
                         <th>Price</th>
@@ -220,7 +245,7 @@ const Products = () => {
                                     return (
                                         <tr key={item._id}>
                                             <td>
-                                                <Checkbox />
+                                                <Checkbox checked={ids.includes(item._id)} onChange={() => handleSelectProduct(item._id)} />
                                             </td>
                                             <td>{item.name}</td>
                                             <td>{item.description}</td>
