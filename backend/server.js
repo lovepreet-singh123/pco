@@ -156,6 +156,26 @@ app.delete("/products/:id", async (req, res) => {
     }
 });
 
+
+app.delete("/products", async (req, res) => {
+    const { ids } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ msg: "Please provide an array of product IDs to delete" });
+    }
+
+    try {
+        const result = await Product.deleteMany({ _id: { $in: ids } });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ msg: "No products found to delete" });
+        }
+
+        res.json({ msg: "Products deleted successfully", deletedCount: result.deletedCount });
+    } catch (err) {
+        res.status(500).json({ msg: "Failed to delete products", error: err.message });
+    }
+});
 // Get single product by ID
 app.get("/products/:id", async (req, res) => {
     const { id } = req.params;

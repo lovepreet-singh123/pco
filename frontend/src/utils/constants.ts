@@ -54,6 +54,7 @@ export const API = {
     CREATE_PRODUCT: "products",
     UPDATE_PRODUCT: "products/:id",
     DELETE_PRODUCT: "products/:id",
+    DELETE_PRODUCTS: "products"
 }
 export const API_STATUS = {
     PENDING: "pending",

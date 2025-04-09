@@ -2,10 +2,9 @@ import { useCallback, useMemo, useState } from "react"
 import { Badge, Table } from "react-bootstrap"
 import { Controller } from "react-hook-form"
 import { Range } from "react-range"
-import Swal from "sweetalert2"
 import { useDebouncedCallback } from "use-debounce"
-import useFilter from "../../actions/products/product.action"
-import { useDeleteProductMutation, useGetProductsQuery } from "../../api/products/products.api"
+import useFilter, { useDeleteProduct } from "../../actions/products/product.action"
+import { useGetProductsQuery } from "../../api/products/products.api"
 import Button from "../../components/Button/Button"
 import Checkbox from "../../components/form/Checkbox/Checkbox"
 import Select from "../../components/form/Select/Select"
@@ -27,9 +26,11 @@ const Products = () => {
     const { control, handlePage, setValue, values, reset } = useFilter();
     const handleUpdateSearch = useUpdate();
     const { data, status, refetch } = useGetProductsQuery(values);
-    const [deleteProduct, { status: deletingProduct }] = useDeleteProductMutation();
+    const { handleDelete, loading: deleteProductLoading } = useDeleteProduct(() => {
+        setId("");
+        refetch();
+    });
     const loading = useMemo(() => status === API_STATUS.PENDING, [status]);
-    const deleteProductLoading = useMemo(() => deletingProduct === API_STATUS.PENDING, [deletingProduct]);
 
     const handleCloseProductModal = useCallback((shouldRefetch = false) => {
         setShow(false);
@@ -40,30 +41,11 @@ const Products = () => {
     }, [refetch])
     const handleCloseViewModal = useCallback(() => setView(false), [])
 
-    const handleDelete = useDebouncedCallback((id: string) => {
-        Swal.fire({
-            title: "Do you want to delete the product?",
-            showCancelButton: true,
-            confirmButtonText: "Delete",
-        }).then(async result => {
-            if (result.isConfirmed) {
-                try {
-                    await deleteProduct({ id }).unwrap();
-                    setId("");
-                    refetch();
-                } catch (error) {
-                    console.log('error: ', error);
-                }
-            }
-        })
-    }, 300)
-
     const handleReset = useDebouncedCallback(() => {
         reset();
         setRangeValues([PRICE.MIN, PRICE.MAX])
         handleUpdateSearch("search", "", true);
     }, 300)
-
 
     return (
         <div>
@@ -215,7 +197,7 @@ const Products = () => {
             <Table responsive>
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th><Checkbox /></th>
                         <th>Name</th>
                         <th>Description</th>
                         <th>Price</th>
@@ -234,10 +216,12 @@ const Products = () => {
                             </tr>
                             :
                             (data?.products && data?.products.length > 0) ?
-                                data?.products.map((item, index) => {
+                                data?.products.map((item) => {
                                     return (
                                         <tr key={item._id}>
-                                            <td>{index + 1}</td>
+                                            <td>
+                                                <Checkbox />
+                                            </td>
                                             <td>{item.name}</td>
                                             <td>{item.description}</td>
                                             <td>{item.price}</td>

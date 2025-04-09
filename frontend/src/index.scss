@@ -133,3 +133,8 @@ input:-webkit-autofill:active {
         padding: 7.5px;
     }
 }
+input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
