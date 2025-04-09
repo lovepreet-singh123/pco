@@ -1,0 +1,135 @@
+@use "./assets/theme/_var.scss" as *;
+
+// html {
+//   font-size: 62.5%;
+// }
+
+body {
+    font-size: 1.6rem;
+}
+
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3,
+h4,
+.h4,
+h5,
+.h5,
+h6,
+.h6,
+p {
+    margin-bottom: 0;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+    max-width: 100%;
+}
+
+a {
+    text-decoration: none;
+}
+
+a,
+span {
+    display: inline-block;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.clickable {
+    cursor: pointer !important;
+}
+
+.modal {
+    &.fade {
+        .modal-dialog {
+            transform: scale(0.9);
+            opacity: 0;
+            transition: 400ms ease-in-out;
+        }
+
+        &.show {
+            .modal-dialog {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    }
+}
+
+.modal-backdrop {
+    transition: 400ms ease-in-out;
+
+    &.show {
+        opacity: 1;
+        background-color: rgba(black, 0.5);
+        backdrop-filter: blur(10px);
+    }
+}
+
+.table {
+    --bs-table-bg: transparent;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Change the white to any color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: black !important;
+}
+
+//  z -indexes
+.z-xlg {
+    z-index: 15 !important;
+}
+
+.z-lg {
+    z-index: 10 !important;
+}
+
+.z-md {
+    z-index: 5 !important;
+}
+
+.z-low {
+    z-index: 1 !important;
+}
+
+// toast
+.go4109123758 {
+    font-size: 14px;
+}
+
+.row {
+    margin: -7.5px;
+
+    >div {
+        padding: 7.5px;
+    }
+}
