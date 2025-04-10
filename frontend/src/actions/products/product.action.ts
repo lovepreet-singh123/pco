@@ -52,7 +52,6 @@ export const useDeleteProduct = (cb?: () => void) => {
             if (result.isConfirmed) {
                 try {
                     await deleteProduct({ id }).unwrap();
-                    console.log('cb: ', cb);
                     if (cb) {
                         cb();
                     }
@@ -82,7 +81,6 @@ export const useDeleteProducts = (cb?: () => void) => {
             if (result.isConfirmed) {
                 try {
                     await deleteProducts({ ids }).unwrap();
-                    console.log('cb: ', cb);
                     if (cb) {
                         cb();
                     }

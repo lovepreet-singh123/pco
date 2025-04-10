@@ -22,7 +22,7 @@ const RoleModal = ({ show, handleClose }: PropTypes) => {
                     />
                     <Select
                         options={ROLES}
-                        label="Status"
+                        label="Role"
                     />
                     <Button
                         type="submit"

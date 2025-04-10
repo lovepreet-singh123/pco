@@ -11,6 +11,7 @@ const Dashboard = () => {
     const { permissions, role } = useAppSelector(state => state.user);
     const permissionSet = useMemo(() => new Set(permissions), [permissions]);
     const filteredRoutes = useMemo(() => role === ROLE.ADMIN ? routes : routes.filter(item => permissionSet.has(item.module)), [role, permissionSet])
+    
     return (
         <div>
             <Row>

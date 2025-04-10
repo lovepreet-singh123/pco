@@ -156,7 +156,6 @@ app.delete("/products/:id", async (req, res) => {
     }
 });
 
-
 app.delete("/products", async (req, res) => {
     const { ids } = req.body;
 
@@ -193,5 +192,79 @@ app.get("/products/:id", async (req, res) => {
     }
 });
 
+app.post("/users", async (req, res) => {
+    try {
+        const user = await User.create(req.body);
+        res.status(201).json(user);
+    } catch (err) {
+        res.status(500).json({ msg: "Failed to create user", error: err.message });
+    }
+});
+
+app.put("/users/:id", async (req, res) => {
+    const { role, permissions, ...rest } = req.body;
+    try {
+        const updatedUser = await User.findByIdAndUpdate(req.params.id, rest, { new: true });
+        if (!updatedUser) return res.status(404).json({ msg: "User not found" });
+        res.json(updatedUser);
+    } catch (err) {
+        res.status(500).json({ msg: "Failed to update user", error: err.message });
+    }
+});
+
+app.delete("/users/:id", async (req, res) => {
+    try {
+        const deleted = await User.findByIdAndDelete(req.params.id);
+        if (!deleted) return res.status(404).json({ msg: "User not found" });
+        res.json({ msg: "User deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ msg: "Failed to delete user", error: err.message });
+    }
+});
+
+app.get("/users", async (req, res) => {
+    const { search, role, permission } = req.query;
+
+    const query = {};
+
+    if (search) {
+        const regex = new RegExp(search, "i");
+        query.$or = [
+            { name: regex },
+            { email: regex },
+            { username: regex }
+        ];
+    }
+
+    if (role) {
+        query.role = Number(role);
+    }
+
+    if (permission) {
+        query.permissions = { $in: permission.split(",") };
+    }
+
+    try {
+        const users = await User.find(query);
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({ msg: "Failed to fetch users", error: err.message });
+    }
+});
+
+app.put("/users/:id/permissions", async (req, res) => {
+    const { permissions } = req.body;
+    try {
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { permissions },
+            { new: true }
+        );
+        if (!user) return res.status(404).json({ msg: "User not found" });
+        res.json({ msg: "Permissions updated", user });
+    } catch (err) {
+        res.status(500).json({ msg: "Failed to update permissions", error: err.message });
+    }
+});
 
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

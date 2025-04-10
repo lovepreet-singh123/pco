@@ -16,14 +16,13 @@ import Spinner from "../../components/Spinner/Spinner"
 import usePermissions from "../../hooks/usePermission"
 import { useUpdate } from "../../hooks/useSearch"
 import { API_STATUS, CATEGORIES, LIMIT_OPTIONS, PRICE, STATUS_OPTIONS, TAGS } from "../../utils/constants"
-import { getBadge, getFilteredValues } from "../../utils/utils"
+import { getBadge, getFilteredValues, getSelectDefaultValue } from "../../utils/utils"
 
 const Products = () => {
     const [show, setShow] = useState(false);
     const [view, setView] = useState(false);
     const [id, setId] = useState("");
     const [ids, setIds] = useState<string[]>([]);
-    console.log('ids: ', ids);
     const [rangeValues, setRangeValues] = useState([PRICE.MIN, PRICE.MAX]);
     const { canCreate, canDelete, canEdit, canView } = usePermissions("product");
     const { control, handlePage, setValue, values, reset } = useFilter();
@@ -47,6 +46,7 @@ const Products = () => {
             refetch();
         }
     }, [refetch])
+
     const handleCloseViewModal = useCallback(() => setView(false), [])
 
     const handleReset = useDebouncedCallback(() => {
@@ -84,6 +84,7 @@ const Products = () => {
                             onChange={(option) => {
                                 field.onChange(option.map(item => item.value))
                             }}
+                            value={getSelectDefaultValue(CATEGORIES, field.value)}
                             isMulti
                         />
                     )}
@@ -95,6 +96,7 @@ const Products = () => {
                         <Select
                             onChange={(option) => field.onChange(option?.value)}
                             options={[{ value: "", label: "All", }, ...STATUS_OPTIONS]}
+                            value={getSelectDefaultValue([{ value: "", label: "All", }, ...STATUS_OPTIONS], field.value)}
                         />
                     )}
                 />
@@ -108,6 +110,7 @@ const Products = () => {
                                 setValue("page", 1);
                             }}
                             options={LIMIT_OPTIONS}
+                            value={getSelectDefaultValue(LIMIT_OPTIONS, field.value)}
                         />
                     )}
                 />
@@ -160,14 +163,14 @@ const Products = () => {
                 <Controller
                     control={control}
                     name="is_premium"
-                    render={({ field }) => <Checkbox {...field} value="true" label={"Is Premium"} />}
+                    render={({ field }) => <Checkbox {...field} checked={field.value} value="true" label={"Is Premium"} />}
                 />
             </div>
             <div className="d-flex my-4 gap-3 align-items-center">
                 <Controller
                     control={control}
                     name="in_stock"
-                    render={({ field }) => <Checkbox {...field} value="true" label={"Is in stock"} />}
+                    render={({ field }) => <Checkbox {...field} checked={field.value} value="true" label={"Is in stock"} />}
                 />
             </div>
             <div className="d-flex my-4 gap-3 align-items-center">
