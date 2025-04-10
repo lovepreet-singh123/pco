@@ -1,11 +1,13 @@
+
 import { yupResolver } from "@hookform/resolvers/yup"
 import { FormEvent, useCallback, useMemo } from "react"
 import { Modal } from "react-bootstrap"
 import { useForm } from "react-hook-form"
 import { useDebouncedCallback } from "use-debounce"
-import { useUpdateRoleMutation, useUserQuery } from "../../api/users/users.api"
-import { API_STATUS, ROLE, ROLES } from "../../utils/constants"
-import { getSelectDefaultValue, Yup } from "../../utils/utils"
+import { useUpdatePermissionsMutation, useUserQuery } from "../../api/users/users.api"
+import { routes } from "../../routes/AuthRoutes/Routes"
+import { API_STATUS, PERMISSIONS } from "../../utils/constants"
+import { capitalize, getSelectDefaultValue, Yup } from "../../utils/utils"
 import Button from "../Button/Button"
 import Select from "../form/Select/Select"
 import Spinner from "../Spinner/Spinner"
@@ -16,35 +18,40 @@ type PropTypes = {
     handleClose: (shouldRefetch?: boolean) => void,
 }
 
-const RoleModal = ({ show, id, handleClose }: PropTypes) => {
+const PermissionModal = ({ show, id, handleClose }: PropTypes) => {
     const { data, status } = useUserQuery({ id });
-    const [updateRole, { status: updateRoleStatus }] = useUpdateRoleMutation();
-    const isSubmitting = useMemo(() => updateRoleStatus === API_STATUS.PENDING, [updateRoleStatus]);
+    const [updatePermissions, { status: updatePermissionStatus }] = useUpdatePermissionsMutation();
+    const isSubmitting = useMemo(() => updatePermissionStatus === API_STATUS.PENDING, [updatePermissionStatus]);
     const loading = useMemo(() => status === API_STATUS.PENDING, [status]);
+    const PERMISSIONS_LIST = useMemo(() => routes.map(item => ({ value: item.module, label: capitalize(item.module) })), [routes]);
 
     const { setValue, watch, handleSubmit } = useForm({
         values: {
-            role: data?.role || ROLE.USER,
+            permissions: data?.permissions || [PERMISSIONS.DASHBOARD],
         },
         resolver: yupResolver(Yup.object({
-            role: Yup.number().required(),
+            permissions: Yup.array(Yup.string().required()).required(),
         })),
     });
 
     const values = watch();
-    const onSubmit = handleSubmit(async ({ role }) => {
+
+    const onSubmit = handleSubmit(async ({ permissions }) => {
         try {
-            await updateRole({ id, role, }).unwrap();
+            await updatePermissions({ id, permissions, }).unwrap();
             handleClose(true);
         } catch (error) {
             console.log('error: ', error);
         }
     })
+
     const debouncedSubmit = useDebouncedCallback(() => onSubmit(), 300);
+
     const handleFormSubmit = useCallback((event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         debouncedSubmit();
     }, [])
+
     return (
         <Modal
             show={show}
@@ -63,10 +70,13 @@ const RoleModal = ({ show, id, handleClose }: PropTypes) => {
                                 value={{ value: "", label: data?.username || "" }}
                             />
                             <Select
-                                options={ROLES}
-                                label="Role"
-                                onChange={option => setValue("role", Number(option?.value))}
-                                value={getSelectDefaultValue(ROLES, values.role)}
+                                options={PERMISSIONS_LIST}
+                                label="Permissions"
+                                isMulti
+                                onChange={(option, action) => {
+                                    setValue("permissions", option.map(item => String(item.value)));
+                                }}
+                                value={getSelectDefaultValue(PERMISSIONS_LIST, values.permissions)}
                             />
                             <Button
                                 type="submit"
@@ -82,4 +92,4 @@ const RoleModal = ({ show, id, handleClose }: PropTypes) => {
     )
 }
 
-export default RoleModal
+export default PermissionModal

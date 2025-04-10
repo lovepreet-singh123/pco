@@ -12,7 +12,7 @@ const AuthGaurd = ({ module }: PropTypes) => {
     if (!isLoggedIn) {
         return <Navigate to={ROUTES.LOGIN} />
     }
-    
+
     const permissionSet = new Set(permissions);
 
     if (role !== ROLE.ADMIN && !permissionSet.has(module)) {

@@ -8,12 +8,13 @@ import Input from "../../components/form/Input/Input"
 import { useSearch, useUpdate } from "../../hooks/useSearch"
 import { useAppSelector } from "../../redux/store"
 import { ROUTES } from "../../utils/constants"
+import { getRole } from "../../utils/utils"
 
 const AuthLayout = () => {
     const handleLogout = useLogout();
     const handleUpdate = useUpdate();
     const { search } = useSearch<{ search: string }>();
-    const { details: { name } } = useAppSelector(state => state.user);
+    const { details: { name }, role } = useAppSelector(state => state.user);
     const [searchValue, setSearchValue] = useState(search || "");
 
     const updateDebouncedSearch = useDebouncedCallback((value) => {
@@ -34,7 +35,7 @@ const AuthLayout = () => {
         <div>
             <Navbar expand="lg" className="mb-5 bg-body-tertiary">
                 <Container>
-                    <Navbar.Brand href="#home">{name}</Navbar.Brand>
+                    <Navbar.Brand href="#home">{name}({getRole(role || 0)})</Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="me-auto">

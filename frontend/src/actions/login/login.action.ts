@@ -15,7 +15,7 @@ const validationSchema = Yup.object({
 
 const defaultValues = {
     username: "",
-    password: "",
+    password: "test123",
 }
 
 export const useLogin = () => {

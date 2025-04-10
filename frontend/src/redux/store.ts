@@ -8,6 +8,7 @@ import { loginApi } from "../api/login/login.api";
 import { userSlice } from "../slices/user/user.slice";
 import errorHandlerMiddleware from "../utils/errorhandler.middleware";
 import { productsApi } from "../api/products/products.api";
+import { userApi } from "../api/users/users.api";
 
 const persistConfig = {
     key: "root",
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
     user: userSlice.reducer,
     [loginApi.reducerPath]: loginApi.reducer,
     [productsApi.reducerPath]: productsApi.reducer,
+    [userApi.reducerPath]: userApi.reducer,
 })
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
@@ -25,7 +27,7 @@ const store = configureStore({
     middleware: getdefaultMiddleware =>
         getdefaultMiddleware({
             serializableCheck: false,
-        }).concat(errorHandlerMiddleware, loginApi.middleware, productsApi.middleware),
+        }).concat(errorHandlerMiddleware, loginApi.middleware, productsApi.middleware, userApi.middleware),
 })
 setupListeners(store.dispatch);
 export const persistor = persistStore(store);

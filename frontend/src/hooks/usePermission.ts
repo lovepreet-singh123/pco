@@ -1,23 +1,53 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAppSelector } from "../redux/store";
+import { PERMISSIONS, ROLE } from "../utils/constants";
 
 export const permissions = {
-    1: ["product:edit", "product:view", "product:delete", "product:create"],
-    2: ["product:view"],
-    3: ["product:edit", "product:view"],
+    1: [
+        `${PERMISSIONS.PRODUCTS}:edit`,
+        `${PERMISSIONS.PRODUCTS}:view`,
+        `${PERMISSIONS.PRODUCTS}:delete`,
+        `${PERMISSIONS.PRODUCTS}:create`,
+        `${PERMISSIONS.ROLE_MANAGEMENT}:edit`,
+        `${PERMISSIONS.ROLE_MANAGEMENT}:view`,
+        `${PERMISSIONS.USER_MANAGEMENT}:edit`,
+        `${PERMISSIONS.USER_MANAGEMENT}:view`,
+        `${PERMISSIONS.USER_MANAGEMENT}:delete`,
+        `${PERMISSIONS.USER_MANAGEMENT}:create`,
+        `${PERMISSIONS.PERMISSION_MANAGEMENT}:edit`,
+        `${PERMISSIONS.PERMISSION_MANAGEMENT}:view`
+    ],
+    2: [
+        `${PERMISSIONS.PRODUCTS}:edit`,
+        `${PERMISSIONS.PRODUCTS}:view`,
+        `${PERMISSIONS.ROLE_MANAGEMENT}:view`,
+        `${PERMISSIONS.USER_MANAGEMENT}:edit`,
+        `${PERMISSIONS.USER_MANAGEMENT}:view`,
+        `${PERMISSIONS.PERMISSION_MANAGEMENT}:edit`,
+        `${PERMISSIONS.PERMISSION_MANAGEMENT}:view`
+    ],
+    3: [
+        `${PERMISSIONS.PRODUCTS}:view`,
+        `${PERMISSIONS.USER_MANAGEMENT}:view`,
+        `${PERMISSIONS.ROLE_MANAGEMENT}:view`,
+        `${PERMISSIONS.PERMISSION_MANAGEMENT}:view`,
+    ],
 }
-
-const usePermissions = (type: string) => {
-    const { role } = useAppSelector(state => state.user);
+type permissionsOf = keyof typeof PERMISSIONS;
+const usePermissions = (type: permissionsOf) => {
+    const { role, permissions: modulePermissions } = useAppSelector(state => state.user);
     const [permission, setPermission] = useState({
         canEdit: false,
         canView: false,
         canDelete: false,
         canCreate: false,
     });
+    const modulePermissionsSet = useMemo(() => new Set(modulePermissions), [modulePermissions]);
 
     const getPermissions = useCallback(() => {
-        if (role) {
+        const modulePermission = role === ROLE.ADMIN ? true : modulePermissionsSet.has(type);
+
+        if (modulePermission) {
             const permissionSet = new Set(permissions[role as keyof typeof permissions]);
             setPermission(() => ({
                 canEdit: permissionSet.has(`${type}:edit`),

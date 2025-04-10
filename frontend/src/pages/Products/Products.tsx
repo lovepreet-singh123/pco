@@ -4,7 +4,7 @@ import { Controller } from "react-hook-form"
 import toast from "react-hot-toast"
 import { Range } from "react-range"
 import { useDebouncedCallback } from "use-debounce"
-import useFilter, { useDeleteProduct, useDeleteProducts } from "../../actions/products/product.action"
+import useFilter, { useDeleteProduct, useDeleteProducts } from "../../actions/products/products.action"
 import { useGetProductsQuery } from "../../api/products/products.api"
 import Button from "../../components/Button/Button"
 import Checkbox from "../../components/form/Checkbox/Checkbox"
@@ -24,11 +24,11 @@ const Products = () => {
     const [id, setId] = useState("");
     const [ids, setIds] = useState<string[]>([]);
     const [rangeValues, setRangeValues] = useState([PRICE.MIN, PRICE.MAX]);
-    const { canCreate, canDelete, canEdit, canView } = usePermissions("product");
+    const { canCreate, canDelete, canEdit, canView } = usePermissions("PRODUCTS");
     const { control, handlePage, setValue, values, reset } = useFilter();
     const handleUpdateSearch = useUpdate();
     const { data, status, refetch } = useGetProductsQuery(values);
-    const allSelected = useMemo(() => data?.products && data.products.length === ids.length, [ids, data])
+    const allSelected = useMemo(() => data?.products && data.products.length === ids.length || false, [ids, data])
     const { handleDelete, loading: deleteProductLoading } = useDeleteProduct(() => {
         setId("");
         refetch();
@@ -83,6 +83,7 @@ const Products = () => {
                             options={CATEGORIES}
                             onChange={(option) => {
                                 field.onChange(option.map(item => item.value))
+                                setValue("page", 1);
                             }}
                             value={getSelectDefaultValue(CATEGORIES, field.value)}
                             isMulti
@@ -94,7 +95,10 @@ const Products = () => {
                     name="status"
                     render={({ field }) => (
                         <Select
-                            onChange={(option) => field.onChange(option?.value)}
+                            onChange={(option) => {
+                                field.onChange(option?.value);
+                                setValue("page", 1);
+                            }}
                             options={[{ value: "", label: "All", }, ...STATUS_OPTIONS]}
                             value={getSelectDefaultValue([{ value: "", label: "All", }, ...STATUS_OPTIONS], field.value)}
                         />
@@ -127,6 +131,7 @@ const Products = () => {
                         onFinalChange={(values) => {
                             setValue("min_price", values[0]);
                             setValue("max_price", values[1]);
+                            setValue("page", 1);
                         }}
                         renderTrack={({ props, children }) => (
                             <div
@@ -157,7 +162,7 @@ const Products = () => {
                 </div>
                 <Button onClick={handleReset} className="ms-auto">Reset</Button>
                 {canCreate && <Button onClick={() => setShow(true)} className="ms-auto">Create</Button>}
-                {(canDelete && ids.length > 0) && (deleteProductsLoading ? <Spinner /> : <Button onClick={() => handleDeleteProducts(ids)} className="ms-auto">Delete Selected</Button>)}
+                {canDelete && ((ids.length > 0) && (deleteProductsLoading ? <Spinner /> : <Button onClick={() => handleDeleteProducts(ids)} className="ms-auto">Delete Selected</Button>))}
             </div>
             <div className="d-flex my-4 gap-3 align-items-center">
                 <Controller
@@ -181,7 +186,10 @@ const Products = () => {
                         <>
                             {Array.from({ length: 5 }, (_, k) => {
                                 return (
-                                    <button type="button" key={k} onClick={() => field.onChange((k + 1))}>
+                                    <button type="button" key={k} onClick={() => {
+                                        field.onChange((k + 1));
+                                        setValue("page", 1);
+                                    }}>
                                         {
                                             field.value < (k + 1) ?
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" width={24} height={24} viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
@@ -195,7 +203,10 @@ const Products = () => {
                                     </button>
                                 )
                             })}
-                            {field.value > 0 && <button type="button" onClick={() => field.onChange(0)}>
+                            {field.value > 0 && <button type="button" onClick={() => {
+                                field.onChange(0);
+                                setValue("page", 1);
+                            }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                                 </svg>
@@ -213,7 +224,7 @@ const Products = () => {
                             key={item.value}
                             render={({ field }) => {
                                 const onChange = () => {
-                                    field.onChange(getFilteredValues(values.tags, item.value))
+                                    field.onChange(getFilteredValues(values.tags, item.value));
                                     setValue("page", 1);
                                 }
                                 return <Checkbox name="tags" onChange={onChange} value={item.value} id={field.name + item.value} label={item.label} />
@@ -260,7 +271,12 @@ const Products = () => {
                                             <td>
                                                 {canEdit && <Button onClick={() => { setShow(true); setId(item._id) }}>Edit</Button>}
                                                 {canView && <Button onClick={() => { setView(true); setId(item._id) }}>View</Button>}
-                                                {canDelete && (deleteProductLoading && id === item._id) ? <Spinner /> : <Button onClick={() => { handleDelete(item._id); setId(item._id) }}>Delete</Button>}
+                                                {
+                                                    canDelete &&
+                                                    <>
+                                                        {(deleteProductLoading && id === item._id) ? <Spinner /> : <Button onClick={() => { handleDelete(item._id); setId(item._id) }}>Delete</Button>}
+                                                    </>
+                                                }
                                             </td>
                                         </tr>
                                     )

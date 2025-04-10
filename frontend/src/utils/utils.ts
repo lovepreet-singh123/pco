@@ -20,4 +20,10 @@ const getSelectDefaultValue = <T>(options: Option[], value: T) => {
     return options.find(option => option.value === value);
 };
 
-export { getBadge, getFilteredValues, capitalize, Yup, getSelectDefaultValue };
+const getRole = (role: number) => role === 1 ? "Admin" : role === 2 ? "SubAdmin" : "User";
+
+const safeText = (str?: string, fallback?: string) => str ? str : (fallback || "--");
+
+const getIndex = (page: number, index: number, limit = 10) => index + 1 + (limit * (page - 1));
+
+export { safeText, getBadge, getRole, getFilteredValues, capitalize, getIndex, Yup, getSelectDefaultValue };

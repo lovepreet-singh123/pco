@@ -20,19 +20,23 @@ const useFilter = () => {
             min_price: PRICE.MIN,
             max_price: PRICE.MAX,
             rating: 0,
-            search,
+            search: "",
         },
     })
-
-    useEffect(() => {
-        setValue("search", search);
-    }, [search, setValue])
+    const values = watch();
 
     const handlePage = useCallback((page: number) => setValue("page", page), [setValue])
 
+    useEffect(() => {
+        if (search !== values.search) {
+            setValue("search", search);
+            setValue("page", 1);
+        }
+    }, [search, setValue])
+
     return {
         handlePage,
-        values: watch(),
+        values,
         setValue,
         reset,
         control,
@@ -74,7 +78,7 @@ export const useDeleteProducts = (cb?: () => void) => {
 
     const handleDeleteProducts = useDebouncedCallback((ids: string[]) => {
         Swal.fire({
-            title: "Do you want to delete the product?",
+            title: "Do you want to delete the products?",
             showCancelButton: true,
             confirmButtonText: "Delete",
         }).then(async result => {

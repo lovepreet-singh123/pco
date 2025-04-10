@@ -38,6 +38,7 @@ export const ROLE = {
     USER: 3,
     SUBADMIN: 2,
 }
+
 export const ROLES = [
     { value: ROLE.ADMIN, label: "Admin", },
     { value: ROLE.SUBADMIN, label: "SubAdmin", },
@@ -54,7 +55,11 @@ export const API = {
     CREATE_PRODUCT: "products",
     UPDATE_PRODUCT: "products/:id",
     DELETE_PRODUCT: "products/:id",
-    DELETE_PRODUCTS: "products"
+    DELETE_PRODUCTS: "products",
+    USERS: "users",
+    USER: "users/:id",
+    UPDATE_ROLE: "users/:id/role",
+    UPDATE_PERMISSIONS: "users/:id/permissions",
 }
 export const API_STATUS = {
     PENDING: "pending",
@@ -73,4 +78,13 @@ export const LIMIT_OPTIONS = [
 export const MSGS = {
     PRODUCT_CREATED: "product has been created",
     PRODUCT_UPDATED: "product has been updated",
+    USER_UPDATED: "user has been updated",
+    USER_CREATED: "user has been created",
+}
+export const PERMISSIONS = {
+    DASHBOARD: "DASHBOARD",
+    USER_MANAGEMENT: "USER_MANAGEMENT",
+    ROLE_MANAGEMENT: "ROLE_MANAGEMENT",
+    PERMISSION_MANAGEMENT: "PERMISSION_MANAGEMENT",
+    PRODUCTS: "PRODUCTS",
 }

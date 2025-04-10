@@ -9,7 +9,7 @@ export const useSearch = <T extends Record<string, string>>(): T => {
             result[key as keyof T] = value as T[keyof T];
         });
         return result;
-    }, [location.search]); // 👈 key line
+    }, [location.search]);
     return values;
 }
 
